@@ -1,14 +1,10 @@
+from random import choice
 
 
+from string import digits, ascii_uppercase
 
-def create_wallet():
-    pass
 
-def all_users_wallets():
-    pass
-
-def wallet_by_name():
-    pass
-
-def delete_wallet():
-    pass
+def create_name():
+    random_name = digits + ascii_uppercase
+    name = "".join(choice(random_name) for i in range(8))
+    return name

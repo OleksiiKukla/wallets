@@ -9,24 +9,51 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('transactions', '0001_initial'),
+        ("transactions", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Wallet',
+            name="Wallet",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=8)),
-                ('type', models.CharField(choices=[('Visa', 'Visa'), ('mastercard', 'Mastercard')], max_length=25)),
-                ('currency', models.CharField(choices=[('USD', 'Usd'), ('EUR', 'Eur'), ('RUB', 'Rub')], max_length=25)),
-                ('balance', models.DecimalField(decimal_places=2, max_digits=6)),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('modified_on', models.DateTimeField(auto_now=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL, verbose_name='User')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=8)),
+                (
+                    "type",
+                    models.CharField(
+                        choices=[("Visa", "Visa"), ("mastercard", "Mastercard")],
+                        max_length=25,
+                    ),
+                ),
+                (
+                    "currency",
+                    models.CharField(
+                        choices=[("USD", "Usd"), ("EUR", "Eur"), ("RUB", "Rub")],
+                        max_length=25,
+                    ),
+                ),
+                ("balance", models.DecimalField(decimal_places=2, max_digits=6)),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("modified_on", models.DateTimeField(auto_now=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="User",
+                    ),
+                ),
             ],
         ),
         migrations.DeleteModel(
-            name='User',
+            name="User",
         ),
     ]
