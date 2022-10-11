@@ -8,5 +8,5 @@ class Currensy_Choises(models.TextChoices):
 
 
 class Type_Cards_Choises(models.TextChoices):
-    Visa = "Visa"
+    visa = "visa"
     mastercard = "mastercard"

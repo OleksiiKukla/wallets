@@ -1,8 +1,6 @@
 from decimal import Decimal
 
 from django.db import models
-from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
 
 
 from . import enums
@@ -24,7 +22,7 @@ class Wallet(models.Model):
     modified_on = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.user}--{self.name} -- {self.currency} --{self.balance}"
+        return f"{self.name}"
 
     def save(self, *args, **kwargs):
         if not self.name:
@@ -37,53 +35,39 @@ class Wallet(models.Model):
 
 
 class Transaction(models.Model):
-    """
-    Transaction entity
-    - sender - wallet_id
-    - receiver - wallet_id
-    - transer_amount of money that “sender” send to “receiver”. Example - 5.00
-    - commision - 0.00 if no commision else transfer_amount * 0.10
-    - status - PAID if no problems else FAILED
-    - timestamp - datetime when transaction was created
-    """
-
     sender = models.ForeignKey(Wallet, related_name="sender", on_delete=models.PROTECT)
     receiver = models.ForeignKey(
         Wallet, related_name="receiver", on_delete=models.PROTECT
     )
     transer_amount = models.DecimalField(max_digits=100, decimal_places=2)
     commision = models.DecimalField(max_digits=100, decimal_places=2)
-    status = models.CharField(max_length=100)
+    status = models.CharField(max_length=100, default="PAID")
     timestamp = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.sender} {self.receiver.name} {self.transer_amount} {self.commision} {self.status} {self.timestamp}"
 
     def save(self, *args, **kwargs):
-        # Сделать проверку на наличие кошельков
-        sender = Wallet.objects.get(id=self.sender.id)
-        receiver = Wallet.objects.get(id=self.receiver.id)
 
-        if not check_currency(sender.currency, receiver.currency):
+        if not check_currency(self.sender.currency, self.receiver.currency):
             raise ValueError
-        elif check_balance(sender.balance, self.transer_amount):
-            self.status = 'FAILED - Not enough  money'
+        elif check_balance(self.sender.balance, self.transer_amount):
+            self.status = "FAILED - Not enough  money"
 
-        # Сделать проверку на статус, если фейлед выход ?
+        if self.status == "PAID":
 
-        if sender.user.id == receiver.user.id:
-            self.commision = 0
+            if self.sender.user.id == self.receiver.user.id:
+                self.commision = 0
+            else:
+                self.commision = self.transer_amount * Decimal(0.10)
+
+            self.sender.balance -= self.transer_amount
+            self.sender.save()
+
+            self.transer_amount -= self.commision
+
+            self.receiver.balance += self.transer_amount
+            self.receiver.save()
         else:
-            self.commision = self.transer_amount * Decimal(0.10)
-
-        sender.balance -= self.transer_amount
-        sender.save()
-
-        self.transer_amount -= self.commision
-
-        receiver.balance += self.transer_amount
-        receiver.save()
-
+            self.commision = Decimal(0)
         super(Transaction, self).save(*args, **kwargs)
-
-
