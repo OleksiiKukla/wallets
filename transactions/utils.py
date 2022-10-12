@@ -30,5 +30,3 @@ def check_balance(sender_balance: int, transer_amount: int):
     """
     if transer_amount > sender_balance:
         return True
-
-

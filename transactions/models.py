@@ -6,7 +6,7 @@ from django.db import models
 from . import enums
 from django.contrib.auth.models import User
 
-from .utils import create_name, check_currency, check_balance, check_owner_wallet
+from .utils import create_name, check_currency, check_balance
 
 
 class Wallet(models.Model):

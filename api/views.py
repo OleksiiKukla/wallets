@@ -4,6 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from django.contrib.auth.models import User
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -59,6 +60,7 @@ class TransactionList(APIView):
             Q(sender__in=all_user_wallets) | Q(receiver__in=all_user_wallets)
         )  # фильтруем по текущему юзеру
         serializer = TransactionsListSerializer(queryset, many=True)
+
         return Response(serializer.data)
 
     def post(self, request):

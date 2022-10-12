@@ -20,9 +20,9 @@ urlpatterns = [
     path("transactions/<str:name>/", TransactionsByWallet.as_view()),
     path("", WalletListCreate.as_view(), name="wallets"),
     path("<str:name>/", WalletDetail.as_view()),
-    path("login/", include("rest_framework.urls")),
-    path("registration/auth/", include("djoser.urls")),  # регистрация /auth/users/
-    re_path(
-        r"^auth/", include("djoser.urls.authtoken")
-    ),  # Авторизация по токенам auth/token/login
+    # path("login/", include("rest_framework.urls")),
+    # path("registration/auth/", include("djoser.urls")),  # регистрация /auth/users/
+    # re_path(
+    #     r"^auth/", include("djoser.urls.authtoken")
+    # ),  # Авторизация по токенам auth/token/login
 ]
