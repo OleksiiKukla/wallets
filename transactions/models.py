@@ -16,7 +16,7 @@ class Wallet(models.Model):
     currency = models.CharField(max_length=25, choices=enums.Currensy_Choises.choices)
     balance = models.DecimalField(max_digits=100, decimal_places=2)
     user = models.ForeignKey(
-        User, verbose_name="User", on_delete=models.PROTECT, null=True
+        User, verbose_name="User", on_delete=models.PROTECT, null=False
     )
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
@@ -39,19 +39,19 @@ class Transaction(models.Model):
     receiver = models.ForeignKey(
         Wallet, related_name="receiver", on_delete=models.PROTECT
     )
-    transer_amount = models.DecimalField(max_digits=100, decimal_places=2)
+    transfer_amount = models.DecimalField(max_digits=100, decimal_places=2)
     commision = models.DecimalField(max_digits=100, decimal_places=2)
     status = models.CharField(max_length=100, default="PAID")
     timestamp = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.sender} {self.receiver.name} {self.transer_amount} {self.commision} {self.status} {self.timestamp}"
+        return f"{self.sender} {self.receiver.name} {self.transfer_amount} {self.commision} {self.status} {self.timestamp}"
 
     def save(self, *args, **kwargs):
 
         if not check_currency(self.sender.currency, self.receiver.currency):
             raise ValueError
-        elif check_balance(self.sender.balance, self.transer_amount):
+        elif check_balance(self.sender.balance, self.transfer_amount):
             self.status = "FAILED - Not enough  money"
 
         if self.status == "PAID":
@@ -59,14 +59,14 @@ class Transaction(models.Model):
             if self.sender.user.id == self.receiver.user.id:
                 self.commision = 0
             else:
-                self.commision = self.transer_amount * Decimal(0.10)
+                self.commision = self.transfer_amount * Decimal(0.10)
 
-            self.sender.balance -= self.transer_amount
+            self.sender.balance -= self.transfer_amount
             self.sender.save()
 
-            self.transer_amount -= self.commision
+            self.transfer_amount -= self.commision
 
-            self.receiver.balance += self.transer_amount
+            self.receiver.balance += self.transfer_amount
             self.receiver.save()
         else:
             self.commision = Decimal(0)

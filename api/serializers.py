@@ -8,7 +8,9 @@ from transactions.models import Wallet, Transaction
 
 
 class WalletSerializer(serializers.ModelSerializer):
-    user = serializers.CharField(default=serializers.CurrentUserDefault())
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )  # можно прикрутить текущего юзера
     balance = serializers.HiddenField(default=Decimal(0))
 
     class Meta:
@@ -19,28 +21,30 @@ class WalletSerializer(serializers.ModelSerializer):
 class TransactionsCreateSerializer(serializers.Serializer):
     sender = serializers.CharField(max_length=255)
     receiver = serializers.CharField(max_length=255)
-    transer_amount = serializers.DecimalField(max_digits=100, decimal_places=2)
+    transfer_amount = serializers.DecimalField(max_digits=100, decimal_places=2)
     status = serializers.CharField(default="PAID")
 
     def create(self, validated_data):
-        try:  # Check the wallets exist
-            sender = Wallet.objects.get(name=validated_data["sender"])
-            receiver = Wallet.objects.get(name=validated_data["receiver"])
-        except ObjectDoesNotExist:
-            raise ObjectDoesNotExist
+        return Transaction.objects.create(**validated_data)
 
-        return Transaction.objects.create(
-            sender=sender,
-            receiver=receiver,
-            transer_amount=validated_data["transer_amount"],
-        )
+    # def create(self, validated_data):
+    #      # Check the wallets exist
+    #     sender = Wallet.objects.get(name=validated_data["sender"])
+    #     receiver = Wallet.objects.get(name=validated_data["receiver"])
+    #
+    #
+    #     return Transaction.objects.create(
+    #         sender=sender,
+    #         receiver=receiver,
+    #         transfer_amount=validated_data["transfer_amount"],
+    #     )
 
 
 class TransactionsListSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     sender = serializers.CharField(max_length=255)
     receiver = serializers.CharField(max_length=255)
-    transer_amount = serializers.DecimalField(max_digits=100, decimal_places=2)
+    transfer_amount = serializers.DecimalField(max_digits=100, decimal_places=2)
     commision = serializers.DecimalField(max_digits=100, decimal_places=2)
     status = serializers.CharField(max_length=100, default="PAID")
     timestamp = serializers.DateTimeField()

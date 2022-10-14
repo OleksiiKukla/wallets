@@ -7,42 +7,6 @@ from rest_framework.test import (
 from transactions.models import Wallet
 
 
-class UserCreateApiTestCase(APITestCase):
-    def test_create_user(self):
-        url = "/registration/auth/users/"
-        data = {
-            "email": "test1@gmail.com",
-            "username": "test1",
-            "password": "Test1234123",
-        }
-        response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-    def test_login_user(self):
-        url = "/registration/auth/users/"
-        data = {
-            "email": "test1@gmail.com",
-            "username": "test1",
-            "password": "Test1234123",
-        }
-        self.client.post(url, data, format="json")
-        login_response = self.client.login(username="test1", password="Test1234123")
-        self.assertEqual(login_response, True)
-
-    def test_logout_user(self):
-        url = "/registration/auth/users/"
-        data = {
-            "email": "test1@gmail.com",
-            "username": "test1",
-            "password": "Test1234123",
-        }
-        self.client.post(url, data, format="json")
-        login_response = self.client.login(username="test1", password="Test1234123")
-        # todo при обращении к /walets/ незалогиненым
-        #  TypeError: Cannot cast AnonymousUser to int. Are you trying to use it in place of User?
-        logout_response = self.client.logout()
-
-
 class WalletApiTestCase(APITestCase):
     def setUp(self):
         # If the user must be a superuser use User.objects.create_superuser instead of create_user
@@ -67,16 +31,22 @@ class WalletApiTestCase(APITestCase):
         url = "/wallets/"
         data = {"type": "visa", "currency": "RUB"}
         for i in range(5):
-            response = self.client.post(url, data, format="json")
+            self.client.post(url, data, format="json")
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_wallets(self):
         url = "/wallets/"
         data = {"type": "visa", "currency": "RUB"}
-        response = self.client.post(url, data, format="json")
+        self.client.post(url, data, format="json")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_get_wallets_without_login(self):
+        self.client.logout()
+        url = "/wallets/"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_get_wallet_by_name(self):
         url = "/wallets/"
@@ -87,6 +57,16 @@ class WalletApiTestCase(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_get_wallet_by_name_without_login(self):
+        url = "/wallets/"
+        data = {"type": "visa", "currency": "RUB"}
+        self.client.post(url, data, format="json")
+        self.client.logout()
+        wallet = Wallet.objects.get(user_id=self.user.id)
+        url = f"/wallets/{wallet.name}/"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
     def test_delete_wallet(self):
         url = "/wallets/"
         data = {"type": "visa", "currency": "RUB"}
@@ -95,3 +75,15 @@ class WalletApiTestCase(APITestCase):
         url = f"/wallets/{wallet.name}/"
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_method_put_wallet(self):
+        url = "/wallets/"
+        data = {"type": "visa", "currency": "RUB"}
+        response = self.client.put(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_method_patch_wallet(self):
+        url = "/wallets/"
+        data = {"type": "visa", "currency": "RUB"}
+        response = self.client.patch(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
