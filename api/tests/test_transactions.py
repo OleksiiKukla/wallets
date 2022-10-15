@@ -39,31 +39,30 @@ class TransactionsTestCase(APITestCase):
 
         data_wallets = {"type": "visa", "currency": "RUB"}
         self.client.login(username="test1", password="Test1234123")
-        self.client.post('/wallets/',data_wallets , format="json")
+        self.client.post("/wallets/", data_wallets, format="json")
         self.client.logout()
 
         self.client.login(username="test2", password="Test1234123")
-        self.client.post('/wallets/', data_wallets, format="json")
+        self.client.post("/wallets/", data_wallets, format="json")
         self.client.logout()
 
         data_wallets = {"type": "visa", "currency": "EUR"}
         self.client.login(username="test3", password="Test1234123")
-        self.client.post('/wallets/', data_wallets, format="json")
+        self.client.post("/wallets/", data_wallets, format="json")
         self.client.logout()
 
         self.client.login(username="test4", password="Test1234123")
-        self.client.post('/wallets/', data_wallets, format="json")
+        self.client.post("/wallets/", data_wallets, format="json")
         self.client.logout()
-
 
         self.user1 = User.objects.get(id=1)
         self.user2 = User.objects.get(id=2)
         self.user3 = User.objects.get(id=3)
         self.user4 = User.objects.get(id=4)
-        self.wallet1_user1 = Wallet.objects.get(user= self.user1.id)
-        self.wallet1_user2 = Wallet.objects.get(user= self.user2.id)
-        self.wallet1_user3 = Wallet.objects.get(user= self.user3.id)
-        self.wallet1_user4 = Wallet.objects.get(user= self.user4.id)
+        self.wallet1_user1 = Wallet.objects.get(user=self.user1.id)
+        self.wallet1_user2 = Wallet.objects.get(user=self.user2.id)
+        self.wallet1_user3 = Wallet.objects.get(user=self.user3.id)
+        self.wallet1_user4 = Wallet.objects.get(user=self.user4.id)
 
     def test_create_new_transaction(self):
         self.client.login(username="test1", password="Test1234123")
@@ -78,7 +77,7 @@ class TransactionsTestCase(APITestCase):
 
     def test_all_transactions_current_user(self):
         self.client.login(username="test1", password="Test1234123")
-        url = '/wallets/transactions/'
+        url = "/wallets/transactions/"
         data = {
             "sender": f"{self.wallet1_user1}",
             "receiver": f"{self.wallet1_user2}",
@@ -90,7 +89,7 @@ class TransactionsTestCase(APITestCase):
 
     def test_create_transactions_with_difference_currency(self):
         self.client.login(username="test1", password="Test1234123")
-        url = '/wallets/transactions/'
+        url = "/wallets/transactions/"
         data = {
             "sender": f"{self.wallet1_user1}",
             "receiver": f"{self.wallet1_user3}",
@@ -108,9 +107,9 @@ class TransactionsTestCase(APITestCase):
             "transfer_amount": "1.00",
         }
         self.client.post("/wallets/transactions/", data, format="json")
-        response = self.client.get('/wallets/transactions/')
-        transaction_id = response.data[0]['id']
-        url = f'/wallets/transactions/{transaction_id}/'
+        response = self.client.get("/wallets/transactions/")
+        transaction_id = response.data[0]["id"]
+        url = f"/wallets/transactions/{transaction_id}/"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -131,5 +130,5 @@ class TransactionsTestCase(APITestCase):
             "transfer_amount": "1.00",
         }
         self.client.post("/wallets/transactions/", data, format="json")
-        response = self.client.get('/wallets/transactions/')
+        response = self.client.get("/wallets/transactions/")
         self.assertEqual(len(response.data), 1)
